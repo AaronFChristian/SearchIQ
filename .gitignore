@@ -1,0 +1,29 @@
+# Environment
+.env
+*.env
+
+# API credentials
+*.json
+!package.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+venv/
+.venv/
+searchiq
+.searchiq/
+agents/__pycache__/
+prompts/__pycache__/
+schemas/__pycache__/
+
+# Pipeline outputs (too large + contain generated data)
+outputs/
+
+# Logs
+logs/
+
+# OS
+.DS_Store
