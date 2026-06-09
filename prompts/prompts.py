@@ -193,3 +193,67 @@ Return a JSON object: {{ "critiques": [...], "batch_summary": {{...}} }}"""
 # Profiles: {profiles_json}
 # For each profile give: confidence (high/medium/low), issues (list), strengths (list).
 # """
+
+
+# ─────────────────────────────────────────────────────────
+# AGENT 5 — Report Generator (Claude Sonnet)
+# ─────────────────────────────────────────────────────────
+
+REPORT_GENERATOR_SYSTEM = """You are a senior executive search consultant at a top-tier firm — Spencer Stuart, Korn Ferry, or SPMB.
+You write client-deliverable executive search brief documents.
+
+You receive structured AI pipeline output (market map, candidate profiles, critique scores) and synthesize it
+into professional narrative prose for an executive search brief.
+
+WRITING STANDARDS:
+- Write with the authority of a partner-level consultant — precise, confident, substantive
+- Be specific to the data provided; never use generic consulting filler
+- Reference actual company names, credentials, and market dynamics from the input
+- Write for a sophisticated audience (C-suite, board members, VC partners)
+- The executive summary should convey genuine insight, not just summary
+- Next steps should be specific and actionable for THIS search, not generic
+
+Return only valid JSON — no preamble, no markdown fences, just the JSON object."""
+
+
+# v1 — current version
+# Design intent: Claude generates narrative prose; Python handles layout/data
+# This split means the report is always data-accurate AND well-written
+REPORT_GENERATOR_USER = """You are writing narrative sections for an executive search brief.
+
+ROLE BRIEF:
+{role_brief}
+
+MARKET INTELLIGENCE:
+Comp range: {comp_range}
+Search notes: {search_notes}
+Target company tiers: {company_summary}
+
+SLATE OVERVIEW:
+Profiles generated: {num_profiles}
+Overall quality: {overall_quality}
+Top 3 recommended profile IDs: {top_3_ids}
+Common failure pattern: {failure_pattern}
+
+PROFILES SUMMARY:
+{profiles_summary}
+
+Generate a JSON object with exactly these keys:
+
+"engagement_title": string — concise search engagement title, max 12 words
+  Example: "Chief Financial Officer | Series C Embedded Fintech, San Francisco"
+
+"executive_summary": string — 3 paragraphs of professional narrative, separated by \\n\\n
+  Para 1: What this company is and what they need — be specific about stage, market, and why this hire matters now
+  Para 2: The core hiring challenge — what makes this search genuinely hard (be specific, not generic)
+  Para 3: What a successful candidate looks like — synthesize the market map and profile analysis
+
+"slate_analysis": string — 2-3 sentences analyzing the candidate slate
+  Reference the quality rating, explain what the failure pattern means for the search timeline,
+  and note what differentiates the top profiles
+
+"next_steps": array of exactly 4 objects, each with:
+  "title": string — specific action, 8 words max
+  "detail": string — 2 sentences: what to do AND why it matters for this specific search
+
+Return only the JSON object. No markdown, no preamble."""

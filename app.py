@@ -331,6 +331,69 @@ if "results" in st.session_state:
 
     # ── Export tab ────────────────────────────────────────────────────────────
     with tab_export:
+
+        # ── Agent 5: HTML Search Brief ────────────────────────────────────
+        st.markdown("#### 📄 Executive Search Brief (Agent 5)")
+        st.caption(
+            "Generates a client-ready HTML report: executive summary, market intel, "
+            "top 3 candidate profiles with critique, slate analysis, and next steps. "
+            "Open in browser → print to PDF for client delivery."
+        )
+
+        if "report_html" in st.session_state:
+            st.success(f"✓ Brief ready — **{st.session_state.get('report_title', 'Search Brief')}**")
+            st.download_button(
+                "⬇  Download Search Brief (HTML → open in browser → print to PDF)",
+                data=st.session_state["report_html"],
+                file_name="searchiq_search_brief.html",
+                mime="text/html",
+                use_container_width=True,
+                type="primary",
+            )
+            if st.button("↺  Regenerate Brief", use_container_width=True):
+                del st.session_state["report_html"]
+                st.rerun()
+        else:
+            gen_report = st.button(
+                "▶  Generate Search Brief",
+                use_container_width=True,
+                type="primary",
+                help="Calls Agent 5 (Claude Sonnet) to write the narrative, then assembles the HTML report"
+            )
+            if gen_report:
+                anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+                if not anthropic_key:
+                    st.error("ANTHROPIC_API_KEY not found in .env")
+                else:
+                    pipeline_data = {
+                        "role_brief": res.get("role_brief", ""),
+                        "market_map": res.get("market_map", {}),
+                        "profiles":   res.get("profiles", []),
+                        "critique":   res.get("critique", {}),
+                    }
+                    with st.status("Agent 5: Report Generator — writing narrative and assembling brief...",
+                                   expanded=True) as report_status:
+                        t0 = time.time()
+                        try:
+                            from agents.agent5_report_generator import ReportGeneratorAgent
+                            reporter = ReportGeneratorAgent(api_key=anthropic_key)
+                            report   = reporter.run(pipeline_data)
+                            elapsed  = round(time.time() - t0, 1)
+                            st.session_state["report_html"]  = report["html"]
+                            st.session_state["report_title"] = report["engagement"]
+                            report_status.update(
+                                label=f"✅ Agent 5: Brief generated — {report['tokens']:,} tokens ({elapsed}s)",
+                                state="complete"
+                            )
+                            st.rerun()
+                        except Exception as e:
+                            report_status.update(label=f"❌ Agent 5 failed: {e}", state="error")
+                            st.error(str(e))
+
+        st.divider()
+
+        # ── CSV / Sheets export ───────────────────────────────────────────
+        st.markdown("#### 📊 Structured Data Export")
         export_info = res.get("export", {})
         if export_info:
             dest = export_info.get("destination", "csv")

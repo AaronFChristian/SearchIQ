@@ -25,6 +25,9 @@ AGENT2_MODEL    = "claude-sonnet-4-6"       # stronger instruction-following for
 AGENT3_PROVIDER = "claude"
 AGENT3_MODEL    = "claude-sonnet-4-6"       # best evaluative reasoning
 
+# Agent 5 — Report Generator
+AGENT5_MODEL    = "claude-sonnet-4-6"       # narrative synthesis + HTML report production
+
 # Legacy aliases (keeps existing agent import lines working)
 GEMINI_MODEL  = "gemini-2.0-flash"
 OPENAI_MODEL  = "gpt-4o-mini"
