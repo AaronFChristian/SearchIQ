@@ -1,6 +1,6 @@
 # SearchIQ
 
-**AI-powered executive research co-pilot** — from role brief to evaluated candidate pipeline in under 5 minutes.
+**AI-powered executive research co-pilot** - from role brief to evaluated candidate pipeline in under 5 minutes.
 
 Built in 3 days as a demonstration project for SPMB's AI Data Analyst role.
 
